@@ -15,7 +15,7 @@ python main.py -k YOUR_API_KEY
 
 # Use custom server URL
 
-python main.py -k YOUR_API_KEY --base-url http://your-server:3000
+python main.py -k YOUR_API_KEY --base-url https://unbound2.vercel.app/
 
 # Backend
 
