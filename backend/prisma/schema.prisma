@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+enum actionType {
+  AUTO_ACCEPT 
+  AUTO_REJECT
+  REQUIRE_APPROVAL
+  TIMED_APPROVAL
+}
+enum userType {
+  ADMIN
+  MEMBER
+}
+model Users{
+  id      Int     @id @default(autoincrement())
+  name    String
+  mail    String  @unique
+  phone   String     @unique
+  roleId  Int?
+  apiKey  String  @unique
+  credit  Int @default(100)
+  userType userType @default(MEMBER)
+  Role    Role?     @relation(fields: [roleId], references: [id])
+  logs    logs[]
+  approvals approvals[]
+  approvalsList approvalsList[]
+}
+model Role{
+  id    Int     @id @default(autoincrement())
+  name  String
+  Users Users[]
+  approvals approvals[]
+}
+model rules{
+  id    Int     @id @default(autoincrement())
+  pattern  String
+  action actionType
+
+}
+model approvals{
+  id        Int     @id @default(autoincrement())
+  roleid    Int
+  approvedby Int
+  role      Role    @relation(fields: [roleid], references: [id])
+  approvedUser Users @relation(fields: [approvedby], references: [id])
+  timestamp DateTime @default(now())
+}
+enum approvalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model approvalsList {
+  id        Int     @id @default(autoincrement())
+  userid    Int
+  command   String
+  status    approvalStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      Users   @relation(fields: [userid], references: [id])
+}
+
+model logs{
+  id        Int     @id @default(autoincrement())
+  userid    Int
+  action    String
+  comment   String?
+  timestamp DateTime @default(now())
+  user      Users   @relation(fields: [userid], references: [id])
+}
